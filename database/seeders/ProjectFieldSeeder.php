@@ -11,7 +11,7 @@ class ProjectFieldSeeder extends Seeder
     {
         $fields = [
             'tienda_online' => [
-                ['name' => 'productos_a_vender', 'label' => '¿Productos a vender?', 'type' => 'boolean'],
+                ['name' => 'productos_a_vender', 'label' => '¿Habrá productos a vender?', 'type' => 'boolean'],
                 ['name' => 'login_usuarios', 'label' => '¿Login y gestión de usuarios?', 'type' => 'boolean'],
                 ['name' => 'carrito', 'label' => '¿Carrito de compras?', 'type' => 'boolean'],
                 ['name' => 'cms', 'label' => 'CMS preferido', 'type' => 'text'],
@@ -22,8 +22,8 @@ class ProjectFieldSeeder extends Seeder
             'web_corporativa' => [
                 ['name' => 'tipo_web', 'label' => 'Tipo de web', 'type' => 'select', 'options' => ['Landing', 'Blog', 'Multi-página']],
                 ['name' => 'cms', 'label' => '¿Usar CMS?', 'type' => 'boolean'],
-                ['name' => 'num_paginas', 'label' => 'Número de páginas', 'type' => 'number'],
-                ['name' => 'formulario_contacto', 'label' => '¿Formulario de contacto?', 'type' => 'boolean'],
+                ['name' => 'num_paginas', 'label' => 'Número de páginas en tu web (estimación)', 'type' => 'number'],
+                ['name' => 'formulario_contacto', 'label' => '¿Habrá Formulario de contacto?', 'type' => 'boolean'],
                 ['name' => 'seo', 'label' => 'Optimización SEO', 'type' => 'boolean'],
                 ['name' => 'informacion_adicional', 'label' => 'Información adicional', 'type' => 'textarea'],
             ],
@@ -33,7 +33,12 @@ class ProjectFieldSeeder extends Seeder
                 ['name' => 'habilidades', 'label' => 'Habilidades', 'type' => 'text'],
                 ['name' => 'experiencia_laboral', 'label' => 'Experiencia laboral', 'type' => 'textarea'],
                 ['name' => 'informacion_adicional', 'label' => 'Información adicional', 'type' => 'textarea'],
+            ],
+            'otros' => [
+                ['name' => 'tipo_otro', 'label' => 'Tipo de proyecto', 'type' => 'text'],
+                ['name' => 'descripcion_otro', 'label' => 'Descripción del proyecto', 'type' => 'textarea'],
             ]
+
         ];
 
         foreach ($fields as $category => $fieldList) {
