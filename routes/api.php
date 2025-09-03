@@ -31,7 +31,7 @@ Route::get('project-fields/category/{category}', [ProjectFieldController::class,
 // Endpoint para obtener la solicitud completa de un proyecto
 Route::get('projects/{project}/full', [ProjectController::class, 'showFull']);
 
-Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+Route::middleware(['auth:sanctum'])->group(function () {
 
     //logout
     Route::post('/logout', [UserController::class, 'logout']);
