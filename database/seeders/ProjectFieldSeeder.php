@@ -29,9 +29,8 @@ class ProjectFieldSeeder extends Seeder
             ],
             'portafolio' => [
                 ['name' => 'tipo_portafolio', 'label' => 'Tipo de portafolio', 'type' => 'select', 'options' => ['Personal', 'Profesional']],
-                ['name' => 'proyectos_destacados', 'label' => 'Proyectos destacados', 'type' => 'textarea'],
-                ['name' => 'habilidades', 'label' => 'Habilidades', 'type' => 'text'],
-                ['name' => 'experiencia_laboral', 'label' => 'Experiencia laboral', 'type' => 'textarea'],
+                ['name' => 'numero_paginas', 'label' => 'Número de páginas', 'type' => 'number'],
+                ['name' => 'tu_profesion', 'label' => 'Tu profesión', 'type' => 'text'],
                 ['name' => 'informacion_adicional', 'label' => 'Información adicional', 'type' => 'textarea'],
             ],
             'otros' => [
