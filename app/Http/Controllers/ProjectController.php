@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Project;
+use App\Models\ProjectRequirement;
 
 class ProjectController extends Controller
 {
@@ -46,19 +47,37 @@ class ProjectController extends Controller
     }
 
     
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'name'       => 'required|string|max:255',
+        'client_id'  => 'required|exists:clients,id',
+        'category'   => 'required|string',
+        'requirements' => 'array',
+        'requirements.*.field_id' => 'required|exists:project_fields,id',
+        'requirements.*.value' => 'required',
+    ]);
 
-    public function store(Request $request)
-    {
-        // Create a new project
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'category' => 'required|string',
-            'client_id' => 'required|exists:clients,id',
-        ]);
+    $project = Project::create([
+        'name'      => $validated['name'],
+        'client_id' => $validated['client_id'],
+        'category'  => $validated['category'],
+    ]);
 
-        $project = Project::create($request->all());
-        return response()->json($project, 201);
+    // Guardar requisitos en tabla aparte
+    if (!empty($validated['requirements'])) {
+        foreach ($validated['requirements'] as $req) {
+            ProjectRequirement::create([
+                'project_id'  => $project->id,
+                'field_id'    => $req['field_id'],
+                'field_value' => $req['value'],
+            ]);
+        }
     }
+
+    return response()->json($project->load(['client', 'requirements.field']), 201);
+}
+
 
     public function update(Request $request, $id)
     {
