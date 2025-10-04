@@ -29,9 +29,9 @@ class ProjectController extends Controller
             ],
             'requirements' => $project->requirements->map(function($req) {
                 return [
-                    'field_name' => $req->field->field_name,
+                    'field_id' => $req->field->id,
                     'label' => $req->field->label,
-                    'value' => $req->field_value,
+                    'field_value' => $req->field_value,
                 ];
             }),
         ];
@@ -128,9 +128,9 @@ public function store(Request $request)
             ],
             'requirements' => $project->requirements->map(function ($req) {
                 return [
-                    'field_name' => $req->field->field_name,
+                    'field_id' => $req->field->id,
                     'label' => $req->field->label,
-                    'value' => $req->value, 
+                    'field_value' => $req->field_value,
                 ];
             }),
         ];
