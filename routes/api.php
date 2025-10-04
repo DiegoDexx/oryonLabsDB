@@ -31,10 +31,11 @@ Route::get('project-fields/category/{category}', [ProjectFieldController::class,
 // Endpoint para obtener la solicitud completa de un proyecto
 Route::get('projects/{project}/full', [ProjectController::class, 'showFull']);
 
-Route::post('/logout', [UserController::class, 'logout']);
+
 
 Route::middleware(['auth:sanctum'])->group(function () {
-
+    
+    Route::post('/logout', [UserController::class, 'logout']);
     // CRUD de clientes salvo post , por lo cual no hay apiresource
     Route::get('clients', [ClientController::class, 'index']);
     Route::get('clients/{client}', [ClientController::class, 'show']);
