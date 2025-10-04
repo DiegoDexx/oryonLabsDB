@@ -45,18 +45,26 @@ class ProjectController extends Controller
         // Get a single project
     return response()->json(Project::find($id));
     }
-
-    
 public function store(Request $request)
 {
-    $validated = $request->validate([
-        'name'       => 'required|string|max:255',
-        'client_id'  => 'required|exists:clients,id',
-        'category'   => 'required|string',
+    \Log::info('Payload recibido:', $request->all());
+
+    $data = $request->all();
+
+    if (is_string($data['requirements'] ?? null)) {
+        $data['requirements'] = json_decode($data['requirements'], true);
+    }
+
+    $validated = validator($data, [
+        'name' => 'required|string|max:255',
+        'client_id' => 'required|exists:clients,id',
+        'category' => 'required|string',
         'requirements' => 'array',
         'requirements.*.field_id' => 'required|exists:project_fields,id',
         'requirements.*.value' => 'required',
-    ]);
+    ])->validate();
+
+    \Log::info('Validated:', $validated);
 
     $project = Project::create([
         'name'      => $validated['name'],
@@ -64,19 +72,20 @@ public function store(Request $request)
         'category'  => $validated['category'],
     ]);
 
-    // Guardar requisitos en tabla aparte
     if (!empty($validated['requirements'])) {
         foreach ($validated['requirements'] as $req) {
+            \Log::info('Guardando requirement:', $req);
             ProjectRequirement::create([
-                'project_id'  => $project->id,
-                'field_id'    => $req['field_id'],
-                'value' => $req['value'],
+                'project_id' => $project->id,
+                'field_id'   => $req['field_id'],
+                'value'      => $req['value'],
             ]);
         }
     }
 
     return response()->json($project->load(['client', 'requirements.field']), 201);
 }
+
 
 
     public function update(Request $request, $id)
@@ -102,28 +111,32 @@ public function store(Request $request)
     }
 
     public function showFull(Project $project)
-{
-    $project->load(['client', 'requirements.field']); // carga cliente y cada field
+    {
+        $project->load(['client', 'requirements.field']);
 
-    $response = [
-        'client' => [
-            'name' => $project->client->name,
-            'email' => $project->client->email,
-        ],
-        'project' => [
-            'name' => $project->name,
-            'category' => $project->category,
-        ],
-        'requirements' => $project->requirements->map(function($req) {
-            return [
-                'field_name' => $req->field->field_name,
-                'label' => $req->field->label,
-                'value' => $req->field_value,
-            ];
-        }),
-    ];
+        $response = [
+            'client' => [
+                'id' => $project->client->id,
+                'name' => $project->client->name,
+                'email' => $project->client->email,
+            ],
+            'project' => [
+                'id' => $project->id,
+                'name' => $project->name,
+                'category' => $project->category,
+                'created_at' => $project->created_at,
+            ],
+            'requirements' => $project->requirements->map(function ($req) {
+                return [
+                    'field_name' => $req->field->field_name,
+                    'label' => $req->field->label,
+                    'value' => $req->value, 
+                ];
+            }),
+        ];
 
-    return response()->json($response);
-}
+        return response()->json([$response]);
+    }
+
 }
 
