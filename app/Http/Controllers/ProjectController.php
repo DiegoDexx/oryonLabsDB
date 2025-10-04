@@ -78,7 +78,7 @@ public function store(Request $request)
             ProjectRequirement::create([
                 'project_id' => $project->id,
                 'field_id'   => $req['field_id'],
-                'value'      => $req['value'],
+                'field_value'      => $req['value'],
             ]);
         }
     }

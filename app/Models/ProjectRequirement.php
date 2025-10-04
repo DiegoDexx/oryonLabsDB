@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ProjectRequirement extends Model
 {
-    protected $fillable = ['project_id', 'field_id', 'value'];
+    protected $fillable = ['project_id', 'field_id', 'field_value'];
 
     public $timestamps = false;
 
