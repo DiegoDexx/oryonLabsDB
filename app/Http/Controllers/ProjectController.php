@@ -47,7 +47,7 @@ class ProjectController extends Controller
     }
 public function store(Request $request)
 {
-    \Log::info('Payload recibido:', $request->all());
+
 
     $data = $request->all();
 
@@ -61,7 +61,7 @@ public function store(Request $request)
         'category' => 'required|string',
         'requirements' => 'array',
         'requirements.*.field_id' => 'required|exists:project_fields,id',
-        'requirements.*.value' => 'required',
+        'requirements.*.field_value' => 'required',
     ])->validate();
 
     \Log::info('Validated:', $validated);
@@ -74,7 +74,7 @@ public function store(Request $request)
 
     if (!empty($validated['requirements'])) {
         foreach ($validated['requirements'] as $req) {
-            \Log::info('Guardando requirement:', $req);
+          
             ProjectRequirement::create([
                 'project_id' => $project->id,
                 'field_id'   => $req['field_id'],

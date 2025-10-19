@@ -11,7 +11,7 @@ class ProjectFieldSeeder extends Seeder
     {
         $fields = [
             'tienda_online' => [
-                ['name' => 'productos_a_vender', 'label' => '¿Habrá productos a vender?', 'type' => 'boolean'],
+                ['name' => 'productos_a_vender', 'label' => '¿Qué productos venderás?', 'type' => 'text'],
                 ['name' => 'login_usuarios', 'label' => '¿Login y gestión de usuarios?', 'type' => 'boolean'],
                 ['name' => 'carrito', 'label' => '¿Carrito de compras?', 'type' => 'boolean'],
                 ['name' => 'cms', 'label' => 'CMS preferido', 'type' => 'text'],
