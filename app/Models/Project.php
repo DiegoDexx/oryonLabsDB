@@ -6,8 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Project extends Model
 {
-    //
-    protected $fillable = ['name', 'category', 'client_id'];
+    protected $fillable = ['name', 'category', 'client_id', 'stage', 'priority', 'estimated_delivery'];
 
     public function client()
     {
@@ -19,5 +18,8 @@ class Project extends Model
         return $this->hasMany(ProjectRequirement::class);
     }
 
- 
+    public function activities()
+    {
+        return $this->hasMany(Activity::class);
+    }
 }

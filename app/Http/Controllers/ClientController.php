@@ -2,55 +2,52 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Client;
-
+use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
- //api crud
- public function index()
- {
-     // Get all clients
-     return response()->json(Client::all());
- }
+    public function index()
+    {
+        return response()->json(Client::with(['projects', 'subscriptions'])->get());
+    }
 
- public function show($id)
- {
-     // Get a single client
-     return response()->json(Client::find($id));
- }
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'email' => 'required|string|email|max:255|unique:clients',
+            'phone' => 'nullable|string|max:20',
+            'status' => 'nullable|in:active,inactive,churned',
+        ]);
 
- public function store(Request $request)
- {
-     // Create a new client
-    $request->validate([
-        'name' => 'required|string|max:255',
-        'email' => 'required|string|email|max:255|unique:clients',
-        'phone' => 'nullable|string|max:20',
-    ]);
+        $client = Client::create($validated);
+        return response()->json($client, 201);
+    }
 
-     $client = Client::create($request->all());
-     return response()->json($client, 201);
- }
+    public function show(Client $client)
+    {
+        return response()->json($client->load(['projects', 'subscriptions', 'activities', 'invoices']));
+    }
 
- public function update(Request $request, $id)
- {
-     // Update an existing client
-     $client = Client::find($id);
-     $client->update($request->all());
-     return response()->json($client);
- }
+    public function update(Request $request, Client $client)
+    {
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'company' => 'nullable|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:clients,email,' . $client->id,
+            'phone' => 'nullable|string|max:20',
+            'status' => 'nullable|in:active,inactive,churned',
+        ]);
 
- 
+        $client->update($validated);
+        return response()->json($client);
+    }
 
- public function destroy($id)
- {
-     // Delete a client
-     $client = Client::find($id);
-     $client->delete();
-     return response()->json(null, 204);
- }
-
+    public function destroy(Client $client)
+    {
+        $client->delete();
+        return response()->json(null, 204);
+    }
 }
