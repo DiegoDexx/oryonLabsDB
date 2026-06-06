@@ -19,6 +19,7 @@ return new class extends Migration
                 if (!Schema::hasColumn('clients', 'status')) {
                     $table->enum('status', ['active','inactive','churned'])
                         ->default('active')->after('phone');
+                        
                 }
             });
         }
