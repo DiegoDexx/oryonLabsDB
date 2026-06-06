@@ -1,35 +1,11 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
+// Moved to 2025_08_28_214002_create_invoices_table.php
+// Kept as no-op so the migrations table record is preserved on existing databases.
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-    public function up(): void
-    {
-        Schema::create('invoices', function (Blueprint $table) {
-            $table->id();
-            $table->foreignId('client_id')->constrained()->onDelete('cascade');
-            $table->foreignId('subscription_id')->nullable()->constrained()->onDelete('set null');
-            $table->string('invoice_number')->unique();
-            $table->decimal('amount', 8, 2);
-            $table->enum('type', ['setup', 'monthly', 'extra']);
-            $table->enum('status', ['pending', 'paid', 'overdue', 'cancelled'])->default('pending');
-            $table->date('due_date');
-            $table->date('paid_date')->nullable();
-            $table->timestamps();
-        });
-    }
-
-    /**
-     * Reverse the migrations.
-     */
-    public function down(): void
-    {
-        Schema::dropIfExists('invoices');
-    }
+    public function up(): void {}
+    public function down(): void {}
 };

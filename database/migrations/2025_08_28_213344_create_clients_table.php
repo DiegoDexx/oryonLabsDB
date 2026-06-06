@@ -6,33 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
-        public function up(): void
+    public function up(): void
     {
-        if (Schema::hasTable('clients')) {
-            Schema::table('clients', function (Blueprint $table) {
-                if (!Schema::hasColumn('clients', 'company')) {
-                    $table->string('company')->nullable()->after('name');
-                }
-                if (!Schema::hasColumn('clients', 'status')) {
-                    $table->enum('status', ['active','inactive','churned'])
-                        ->default('active')->after('phone');
-                        
-                }
-            });
-        }
+        Schema::create('clients', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->string('email')->unique();
+            $table->string('phone')->nullable();
+            $table->string('company')->nullable();
+            $table->enum('status', ['active', 'inactive', 'churned'])->default('active');
+            $table->timestamps();
+        });
     }
 
     public function down(): void
     {
-        if (Schema::hasTable('clients')) {
-            Schema::table('clients', function (Blueprint $table) {
-                $table->dropColumn(['company', 'status']);
-            });
-        }
+        Schema::dropIfExists('clients');
     }
-
-    
-    };
+};

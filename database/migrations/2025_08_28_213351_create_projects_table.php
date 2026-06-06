@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('projects', function (Blueprint $table) {
@@ -16,13 +13,16 @@ return new class extends Migration
             $table->string('name');
             $table->string('category');
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
+            $table->enum('stage', [
+                'lead', 'contacted', 'proposal', 'negotiation',
+                'onboarding', 'active', 'closed_won', 'closed_lost'
+            ])->default('lead');
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->date('estimated_delivery')->nullable();
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('projects');

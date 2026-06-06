@@ -6,28 +6,33 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->enum('stage', [
-                'lead', 'contacted', 'proposal', 'negotiation',
-                'onboarding', 'active', 'closed_won', 'closed_lost'
-            ])->default('lead')->after('category');
-            $table->enum('priority', ['low', 'medium', 'high'])->default('medium')->after('stage');
-            $table->date('estimated_delivery')->nullable()->after('priority');
-        });
+        if (Schema::hasTable('projects')) {
+            Schema::table('projects', function (Blueprint $table) {
+                if (!Schema::hasColumn('projects', 'stage')) {
+                    $table->enum('stage', [
+                        'lead', 'contacted', 'proposal', 'negotiation',
+                        'onboarding', 'active', 'closed_won', 'closed_lost'
+                    ])->default('lead')->after('category');
+                }
+                if (!Schema::hasColumn('projects', 'priority')) {
+                    $table->enum('priority', ['low', 'medium', 'high'])
+                        ->default('medium')->after('stage');
+                }
+                if (!Schema::hasColumn('projects', 'estimated_delivery')) {
+                    $table->date('estimated_delivery')->nullable()->after('priority');
+                }
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::table('projects', function (Blueprint $table) {
-            $table->dropColumn(['stage', 'priority', 'estimated_delivery']);
-        });
+        if (Schema::hasTable('projects')) {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->dropColumn(['stage', 'priority', 'estimated_delivery']);
+            });
+        }
     }
 };
