@@ -9,22 +9,29 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
-    public function up(): void
+        public function up(): void
     {
-        Schema::create('clients', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('email')->unique();
-            $table->string('phone')->nullable();
-            $table->timestamps();
-        });
+        if (Schema::hasTable('clients')) {
+            Schema::table('clients', function (Blueprint $table) {
+                if (!Schema::hasColumn('clients', 'company')) {
+                    $table->string('company')->nullable()->after('name');
+                }
+                if (!Schema::hasColumn('clients', 'status')) {
+                    $table->enum('status', ['active','inactive','churned'])
+                        ->default('active')->after('phone');
+                }
+            });
+        }
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('clients');
+        if (Schema::hasTable('clients')) {
+            Schema::table('clients', function (Blueprint $table) {
+                $table->dropColumn(['company', 'status']);
+            });
+        }
     }
-};
+
+    
+    };
