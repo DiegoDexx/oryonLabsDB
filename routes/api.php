@@ -42,17 +42,27 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/logout', [UserController::class, 'logout']);
 
-    // API Resources completos (CRUD)
+    // clients — store y index son públicos, el resto protegido
+    Route::get('clients', [ClientController::class, 'index']);
+    Route::get('clients/{client}', [ClientController::class, 'show']);
+    Route::put('clients/{client}', [ClientController::class, 'update']);
+    Route::patch('clients/{client}', [ClientController::class, 'update']);
+    Route::delete('clients/{client}', [ClientController::class, 'destroy']);
+
+    // projects — store/index/show son públicos, el resto protegido
+    Route::put('projects/{project}', [ProjectController::class, 'update']);
+    Route::patch('projects/{project}', [ProjectController::class, 'update']);
+    Route::delete('projects/{project}', [ProjectController::class, 'destroy']);
+    Route::patch('projects/{project}/stage', [ProjectController::class, 'updateStage']);
+
+    // Recursos completamente protegidos
     Route::apiResources([
-        'clients' => ClientController::class,
-        'projects' => ProjectController::class,
         'subscriptions' => SubscriptionController::class,
-        'activities' => ActivityController::class,
-        'invoices' => InvoiceController::class,
+        'activities'    => ActivityController::class,
+        'invoices'      => InvoiceController::class,
     ]);
 
     // Rutas de estado personalizadas
-    Route::patch('projects/{project}/stage', [ProjectController::class, 'updateStage']);
     Route::patch('subscriptions/{subscription}/status', [SubscriptionController::class, 'updateStatus']);
     Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid']);
 
