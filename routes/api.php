@@ -20,7 +20,7 @@ use App\Http\Controllers\LeadController;
 
 Route::post('/login', [UserController::class, 'login']);
 
-// Rutas públicas para el formulario de leads
+// Ruta pública — formulario de leads
 Route::post('leads', [LeadController::class, 'store']);
 Route::post('clients', [ClientController::class, 'store']);
 Route::get('projects', [ProjectController::class, 'indexFull']);
@@ -65,6 +65,14 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Rutas de estado personalizadas
     Route::patch('subscriptions/{subscription}/status', [SubscriptionController::class, 'updateStatus']);
     Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid']);
+
+    // Leads — gestión CRM
+    Route::get('leads',                  [LeadController::class, 'index']);
+    Route::get('leads/{lead}',           [LeadController::class, 'show']);
+    Route::patch('leads/{lead}/status',  [LeadController::class, 'updateStatus']);
+    Route::patch('leads/{lead}/notes',   [LeadController::class, 'updateNotes']);
+    Route::post('leads/{lead}/convert',  [LeadController::class, 'convert']);
+    Route::delete('leads/{lead}',        [LeadController::class, 'destroy']);
 
     // Rutas administrativas
     Route::get('admin/projects/full', [ProjectController::class, 'indexFull']);

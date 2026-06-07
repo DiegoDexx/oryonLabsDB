@@ -22,3 +22,12 @@ class UserSeeder extends Seeder
         \App\Models\User::find(1)->assignRole('admin');
     }
 }
+
+
+
+
+
+
+
+
+
