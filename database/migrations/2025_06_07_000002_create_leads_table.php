@@ -15,47 +15,73 @@ return new class extends Migration
         Schema::create('leads', function (Blueprint $table) {
             $table->id();
 
-            // Datos de contacto
-            $table->string('nombre');
-            $table->string('empresa')->nullable();
+            // Contact data
+            $table->string('name');
+            $table->string('company')->nullable();
             $table->string('email')->nullable();
-            $table->string('telefono');
+            $table->string('phone');
 
-            // Canal de entrada
-            $table->enum('canal', [
-                'formulario',
+            // Entry channel
+            $table->enum('channel', [
+                'form',
                 'chatbot',
                 'whatsapp',
-                'telefono',
-                'manual',
-            ])->default('formulario');
+                'phone',
+                'email',
+                'instagram',
+                'tikTok',
+                'other',
+            ])->default('form');
 
-            // Contexto del lead
-            $table->string('reto')->nullable();
-            $table->string('volumen_clientes')->nullable();
-            $table->string('herramientas')->nullable();
-            $table->string('urgencia')->nullable();
+            // Lead context
+            $table->string('challenge')->nullable();
+            $table->string('client_volume')->nullable();
+            $table->string('tools')->nullable();
+            $table->string('urgency')->nullable();
 
-            // Campos enriquecidos por IA
-            $table->string('categoria')->nullable();
+            // AI-enriched fields
+            $table->string('category')->nullable();
             $table->string('project_name')->nullable();
-            $table->enum('prioridad', ['low', 'medium', 'high'])->default('medium');
-            $table->string('plan_sugerido')->nullable();
-            $table->text('resumen_comercial')->nullable();
+            $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
+            $table->string('suggested_plan')->nullable();
+            $table->text('commercial_summary')->nullable();
 
-            // Estado del lead
+            // Lead status
             $table->enum('status', [
-                'nuevo',
-                'contactado',
-                'calificado',
-                'convertido',
-                'descartado',
-            ])->default('nuevo');
+                'new',
+                'contacted',
+                'qualified',
+                'converted',
+                'discarded',
+            ])->default('new');
 
-            // Notas manuales del comercial
-            $table->text('notas')->nullable();
+            // Puntuación del lead (0-100) para scoring automático
+            $table->integer('lead_score')->default(0);
 
-            // Relaciones cuando convierte
+            // Siguiente acción recomendada por la IA
+            $table->string('next_action')->nullable();
+
+            // Tags para segmentación
+            $table->string('tags')->nullable(); // "startup,saas,urgente"
+
+            // UTM para tracking de origen de marketing
+            $table->string('utm_source')->nullable();
+            $table->string('utm_campaign')->nullable();
+
+            // Fecha de último contacto
+            $table->timestamp('last_contacted_at')->nullable();
+
+            // Quién gestiona el lead (para cuando tengas equipo)
+            $table->foreignId('assigned_to')
+                ->nullable()
+                ->constrained('users')
+                ->onDelete('set null');
+                    
+
+            // Manual sales notes
+            $table->text('notes')->nullable();
+
+            // Relations after conversion
             $table->foreignId('client_id')
                   ->nullable()
                   ->constrained()

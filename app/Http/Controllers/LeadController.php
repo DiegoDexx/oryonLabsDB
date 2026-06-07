@@ -25,27 +25,27 @@ class LeadController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'nombre'            => 'required|string|max:255',
-            'empresa'           => 'nullable|string|max:255',
-            'email'             => 'nullable|email|max:255',
-            'telefono'          => 'required|string|max:20',
-            'canal'             => 'nullable|string|max:50',
-            'reto'              => 'nullable|string',
-            'volumen_clientes'  => 'nullable|string|max:50',
-            'herramientas'      => 'nullable|string',
-            'urgencia'          => 'nullable|string|max:100',
-            'categoria'         => 'nullable|string|max:100',
-            'project_name'      => 'nullable|string|max:255',
-            'prioridad'         => 'nullable|in:low,medium,high',
-            'plan_sugerido'     => 'nullable|string|max:50',
-            'resumen_comercial' => 'nullable|string',
+            'name'               => 'required|string|max:255',
+            'company'            => 'nullable|string|max:255',
+            'email'              => 'nullable|email|max:255',
+            'phone'              => 'required|string|max:20',
+            'channel'            => 'nullable|string|max:50',
+            'challenge'          => 'nullable|string',
+            'client_volume'      => 'nullable|string|max:50',
+            'tools'              => 'nullable|string',
+            'urgency'            => 'nullable|string|max:100',
+            'category'           => 'nullable|string|max:100',
+            'project_name'       => 'nullable|string|max:255',
+            'priority'           => 'nullable|in:low,medium,high',
+            'suggested_plan'     => 'nullable|string|max:50',
+            'commercial_summary' => 'nullable|string',
         ]);
 
         $lead = Lead::create([
             ...$validated,
-            'status'    => 'nuevo',
-            'canal'     => $validated['canal']     ?? 'formulario',
-            'prioridad' => $validated['prioridad'] ?? 'medium',
+            'status'   => 'new',
+            'channel'  => $validated['channel']  ?? 'form',
+            'priority' => $validated['priority'] ?? 'medium',
         ]);
 
         return response()->json([
@@ -57,7 +57,7 @@ class LeadController extends Controller
     public function updateStatus(Request $request, Lead $lead)
     {
         $request->validate([
-            'status' => 'required|in:nuevo,contactado,calificado,convertido,descartado',
+            'status' => 'required|in:new,contacted,qualified,converted,discarded',
         ]);
         $lead->update(['status' => $request->status]);
         return response()->json($lead);
@@ -65,42 +65,42 @@ class LeadController extends Controller
 
     public function updateNotes(Request $request, Lead $lead)
     {
-        $request->validate(['notas' => 'nullable|string']);
-        $lead->update(['notas' => $request->notas]);
+        $request->validate(['notes' => 'nullable|string']);
+        $lead->update(['notes' => $request->notes]);
         return response()->json($lead);
     }
 
     public function convert(Request $request, Lead $lead)
     {
         $client = Client::updateOrCreate(
-            ['phone' => $lead->telefono],
+            ['phone' => $lead->phone],
             [
-                'name'    => $lead->nombre,
+                'name'    => $lead->name,
                 'email'   => $lead->email,
-                'company' => $lead->empresa,
+                'company' => $lead->company,
                 'status'  => 'active',
             ]
         );
 
         $project = Project::create([
-            'name'              => $lead->project_name ?? "Proyecto: {$lead->nombre}",
-            'category'          => $lead->categoria    ?? 'otros',
-            'client_id'         => $client->id,
-            'stage'             => 'onboarding',
-            'priority'          => $lead->prioridad    ?? 'medium',
-            'resumen_comercial' => $lead->resumen_comercial,
-            'canal'             => $lead->canal,
+            'name'               => $lead->project_name ?? "Project: {$lead->name}",
+            'category'           => $lead->category     ?? 'other',
+            'client_id'          => $client->id,
+            'stage'              => 'onboarding',
+            'priority'           => $lead->priority     ?? 'medium',
+            'resumen_comercial'  => $lead->commercial_summary,
+            'canal'              => $lead->channel,
         ]);
 
         Activity::create([
             'client_id'   => $client->id,
             'project_id'  => $project->id,
             'type'        => 'system',
-            'description' => "Lead convertido a cliente desde canal: {$lead->canal}",
+            'description' => "Lead converted to client from channel: {$lead->channel}",
         ]);
 
         $lead->update([
-            'status'     => 'convertido',
+            'status'     => 'converted',
             'client_id'  => $client->id,
             'project_id' => $project->id,
         ]);
