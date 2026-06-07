@@ -1,32 +1,11 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 
+// Migración reemplazada por 2025_08_30_144420_add_fields_to_clients_table.php
+// Se mantiene como no-op para no romper bases de datos que ya la tenían registrada.
 return new class extends Migration
 {
-    public function up(): void
-    {
-        if (Schema::hasTable('clients')) {
-            Schema::table('clients', function (Blueprint $table) {
-                if (!Schema::hasColumn('clients', 'company')) {
-                    $table->string('company')->nullable()->after('name');
-                }
-                if (!Schema::hasColumn('clients', 'status')) {
-                    $table->enum('status', ['active', 'inactive', 'churned'])
-                        ->default('active')->after('phone');
-                }
-            });
-        }
-    }
-
-    public function down(): void
-    {
-        if (Schema::hasTable('clients')) {
-            Schema::table('clients', function (Blueprint $table) {
-                $table->dropColumn(['company', 'status']);
-            });
-        }
-    }
+    public function up(): void {}
+    public function down(): void {}
 };
