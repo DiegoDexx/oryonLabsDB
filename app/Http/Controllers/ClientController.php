@@ -15,14 +15,18 @@ class ClientController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'email' => 'nullable|string|email|max:255|unique:clients',
-            'phone' => 'nullable|string|max:20',
-            'status' => 'nullable|in:active,inactive,churned',
+            'name'     => 'required|string|max:255',
+            'company'  => 'nullable|string|max:255',
+            'email'    => 'nullable|string|email|max:255|unique:clients',
+            'phone'    => 'nullable|string|max:20',
+            'status'   => 'nullable|in:active,inactive,churned',
+            'language' => 'nullable|string|in:es,en',
         ]);
 
-        $client = Client::create($validated);
+        $client = Client::create([
+            ...$validated,
+            'language' => $validated['language'] ?? 'es',
+        ]);
         return response()->json($client, 201);
     }
 
@@ -34,11 +38,12 @@ class ClientController extends Controller
     public function update(Request $request, Client $client)
     {
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'company' => 'nullable|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:clients,email,' . $client->id,
-            'phone' => 'nullable|string|max:20',
-            'status' => 'nullable|in:active,inactive,churned',
+            'name'     => 'sometimes|string|max:255',
+            'company'  => 'nullable|string|max:255',
+            'email'    => 'sometimes|string|email|max:255|unique:clients,email,' . $client->id,
+            'phone'    => 'nullable|string|max:20',
+            'status'   => 'nullable|in:active,inactive,churned',
+            'language' => 'nullable|string|in:es,en',
         ]);
 
         $client->update($validated);

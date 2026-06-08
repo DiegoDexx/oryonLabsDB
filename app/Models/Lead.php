@@ -22,6 +22,7 @@ class Lead extends Model
         'suggested_plan',
         'commercial_summary',
         'status',
+        'language',
         'notes',
         'client_id',
         'project_id',

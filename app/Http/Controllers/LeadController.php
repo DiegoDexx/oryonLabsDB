@@ -39,6 +39,7 @@ class LeadController extends Controller
             'priority'           => 'nullable|in:low,medium,high',
             'suggested_plan'     => 'nullable|string|max:50',
             'commercial_summary' => 'nullable|string',
+            'language'           => 'nullable|string|in:es,en',
         ]);
 
         $lead = Lead::create([
@@ -75,10 +76,11 @@ class LeadController extends Controller
         $client = Client::updateOrCreate(
             ['phone' => $lead->phone],
             [
-                'name'    => $lead->name,
-                'email'   => $lead->email,
-                'company' => $lead->company,
-                'status'  => 'active',
+                'name'     => $lead->name,
+                'email'    => $lead->email,
+                'company'  => $lead->company,
+                'status'   => 'active',
+                'language' => $lead->language ?? 'es',
             ]
         );
 

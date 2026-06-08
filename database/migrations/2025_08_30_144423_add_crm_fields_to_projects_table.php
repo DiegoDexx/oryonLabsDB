@@ -14,10 +14,10 @@ return new class extends Migration
 
         Schema::table('projects', function (Blueprint $table) {
             if (!Schema::hasColumn('projects', 'resumen_comercial')) {
-                $table->text('resumen_comercial')->nullable()->after('estimated_delivery');
+                $table->text('commercial_summary')->nullable()->after('estimated_delivery');
             }
             if (!Schema::hasColumn('projects', 'canal')) {
-                $table->string('canal')->nullable()->after('resumen_comercial');
+                $table->string('channel')->nullable()->after('commercial_summary');
             }
         });
     }
@@ -28,11 +28,11 @@ return new class extends Migration
             return;
         }
         Schema::table('projects', function (Blueprint $table) {
-            if (Schema::hasColumn('projects', 'resumen_comercial')) {
-                $table->dropColumn('resumen_comercial');
+            if (Schema::hasColumn('projects', 'commercial_summary')) {
+                $table->dropColumn('commercial_summary');
             }
-            if (Schema::hasColumn('projects', 'canal')) {
-                $table->dropColumn('canal');
+            if (Schema::hasColumn('projects', 'channel')) {
+                $table->dropColumn('channel');
             }
         });
     }

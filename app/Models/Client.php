@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Client extends Model
 {
-    protected $fillable = ['name', 'company', 'email', 'phone', 'status'];
+    protected $fillable = ['name', 'company', 'email', 'phone', 'status', 'language'];
 
     public function projects()
     {
