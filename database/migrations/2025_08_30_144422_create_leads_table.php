@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('company')->nullable();
             $table->string('email')->nullable();
-            $table->string('phone');
+            $table->string('phone')->nullable();
 
             // Entry channel
             $table->enum('channel', [

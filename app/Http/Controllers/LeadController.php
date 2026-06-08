@@ -28,7 +28,7 @@ class LeadController extends Controller
             'name'               => 'required|string|max:255',
             'company'            => 'nullable|string|max:255',
             'email'              => 'nullable|email|max:255',
-            'phone'              => 'required|string|max:20',
+            'phone'              => 'nullable|string|max:20',
             'channel'            => 'nullable|string|max:50',
             'challenge'          => 'nullable|string',
             'client_volume'      => 'nullable|string|max:50',
