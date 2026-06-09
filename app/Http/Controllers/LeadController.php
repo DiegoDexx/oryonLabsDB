@@ -90,8 +90,8 @@ class LeadController extends Controller
             'client_id'          => $client->id,
             'stage'              => 'onboarding',
             'priority'           => $lead->priority     ?? 'medium',
-            'resumen_comercial'  => $lead->commercial_summary,
-            'canal'              => $lead->channel,
+            'commercial_summary' => $lead->commercial_summary,
+            'channel'            => $lead->channel,
         ]);
 
         Activity::create([
