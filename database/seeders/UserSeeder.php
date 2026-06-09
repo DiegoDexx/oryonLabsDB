@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use Illuminate\Support\Facades\Hash;
+
 use Illuminate\Database\Seeder;
 
 class UserSeeder extends Seeder
@@ -10,17 +12,20 @@ class UserSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
-    {
-        //crear seeder de 1 user
-        \App\Models\User::create([
+ public function run(): void
+{
+    $user = \App\Models\User::updateOrCreate(
+        ['email' => 'diegojspro@gmail.com'],
+        [
             'name' => 'Admin User',
-            'email' => 'diegojspro@gmail.com',
-            'password' => bcrypt('oryonpanel325001'),
-        ]);
+            'password' => Hash::make('oryonpanel325001'),
+        ]
+    );
 
-        \App\Models\User::find(1)->assignRole('admin');
+    if (!$user->hasRole('admin')) {
+        $user->assignRole('admin');
     }
+}
 }
 
 
