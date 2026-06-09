@@ -11,6 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
+        if (Schema::hasTable('project_fields')) {
+            return;
+        }
+
         Schema::create('project_fields', function (Blueprint $table) {
             $table->id();
             $table->string('category');
