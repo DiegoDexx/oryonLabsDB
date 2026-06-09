@@ -52,7 +52,17 @@ class ClientController extends Controller
 
     public function destroy(Client $client)
     {
-        $client->delete();
-        return response()->json(null, 204);
+        $activeSubscription = $client->subscriptions()
+            ->where('status', 'active')
+            ->exists();
+
+        if ($activeSubscription) {
+            return response()->json([
+                'message' => 'This client has an active subscription. Cancel it before deleting.',
+            ], 422);
+        }
+
+        $client->delete(); // soft delete — sets deleted_at
+        return response()->json(['message' => 'Client deleted successfully.']);
     }
 }
