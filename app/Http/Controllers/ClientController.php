@@ -58,11 +58,21 @@ class ClientController extends Controller
 
         if ($activeSubscription) {
             return response()->json([
-                'message' => 'This client has an active subscription. Cancel it before deleting.',
+                'message' => 'Este cliente tiene una suscripción activa. Cancélala antes de eliminarlo.',
             ], 422);
         }
 
-        $client->delete(); // soft delete — sets deleted_at
-        return response()->json(['message' => 'Client deleted successfully.']);
+        $hasActiveProjects = $client->projects()
+            ->whereNotIn('stage', ['closed_won', 'closed_lost'])
+            ->exists();
+
+        if ($hasActiveProjects) {
+            return response()->json([
+                'message' => 'Este cliente tiene proyectos activos. Ciérralos o elimínalos antes de continuar.',
+            ], 422);
+        }
+
+        $client->delete();
+        return response()->json(['message' => 'Cliente eliminado correctamente.']);
     }
 }
