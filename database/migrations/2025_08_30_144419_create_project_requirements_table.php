@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         if (Schema::hasTable('project_requirements')) {
@@ -17,16 +14,16 @@ return new class extends Migration
 
         Schema::create('project_requirements', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id')->default(1);
             $table->foreignId('project_id')->constrained()->onDelete('cascade');
             $table->foreignId('field_id')->constrained('project_fields')->onDelete('cascade');
             $table->string('field_value');
             $table->timestamps();
+
+            $table->index('organization_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('project_requirements');

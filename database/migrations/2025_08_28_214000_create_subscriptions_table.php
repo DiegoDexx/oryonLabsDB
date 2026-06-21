@@ -14,6 +14,7 @@ return new class extends Migration
 
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id')->default(1);
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->enum('plan', ['starter', 'pro', 'professional', 'voice_ai']);
             $table->decimal('setup_fee', 8, 2);
@@ -23,6 +24,8 @@ return new class extends Migration
             $table->date('next_billing_date')->nullable();
             $table->text('notes')->nullable();
             $table->timestamps();
+
+            $table->index('organization_id');
         });
     }
 

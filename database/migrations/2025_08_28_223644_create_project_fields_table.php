@@ -6,9 +6,6 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         if (Schema::hasTable('project_fields')) {
@@ -17,6 +14,7 @@ return new class extends Migration
 
         Schema::create('project_fields', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id')->default(1);
             $table->string('category');
             $table->string('field_name');
             $table->string('label');
@@ -25,12 +23,11 @@ return new class extends Migration
             $table->boolean('required')->default(false);
             $table->integer('order')->default(0);
             $table->timestamps();
+
+            $table->index('organization_id');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('project_fields');

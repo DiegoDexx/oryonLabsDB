@@ -3,13 +3,21 @@
 namespace App\Http\Controllers;
 
 use App\Models\Client;
+use App\Support\PhoneNormalizer;
 use Illuminate\Http\Request;
 
 class ClientController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Client::with(['projects', 'subscriptions'])->get());
+        $perPage = min($request->integer('per_page', 25), 100);
+
+        return response()->json(
+            Client::with(['projects', 'subscriptions'])
+                ->when($request->status,   fn($q, $v) => $q->where('status', $v))
+                ->when($request->language, fn($q, $v) => $q->where('language', $v))
+                ->paginate($perPage)
+        );
     }
 
     public function store(Request $request)
@@ -22,6 +30,10 @@ class ClientController extends Controller
             'status'   => 'nullable|in:active,inactive,churned',
             'language' => 'nullable|string|in:es,en',
         ]);
+
+        if (array_key_exists('phone', $validated)) {
+            $validated['phone'] = PhoneNormalizer::normalize($validated['phone']);
+        }
 
         $client = Client::create([
             ...$validated,
@@ -46,6 +58,10 @@ class ClientController extends Controller
             'language' => 'nullable|string|in:es,en',
         ]);
 
+        if (array_key_exists('phone', $validated)) {
+            $validated['phone'] = PhoneNormalizer::normalize($validated['phone']);
+        }
+
         $client->update($validated);
         return response()->json($client);
     }
@@ -58,7 +74,7 @@ class ClientController extends Controller
 
         if ($activeSubscription) {
             return response()->json([
-                'message' => 'Este cliente tiene una suscripción activa. Cancélala antes de eliminarlo.',
+                'message' => 'This client has an active subscription. Cancel it before deleting.',
             ], 422);
         }
 
@@ -68,11 +84,11 @@ class ClientController extends Controller
 
         if ($hasActiveProjects) {
             return response()->json([
-                'message' => 'Este cliente tiene proyectos activos. Ciérralos o elimínalos antes de continuar.',
+                'message' => 'This client has active projects. Close or delete them before continuing.',
             ], 422);
         }
 
         $client->delete();
-        return response()->json(['message' => 'Cliente eliminado correctamente.']);
+        return response()->json(['message' => 'Client deleted successfully.']);
     }
 }

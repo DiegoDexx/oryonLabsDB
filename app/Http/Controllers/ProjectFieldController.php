@@ -10,9 +10,6 @@ class ProjectFieldController extends Controller
 {
     //
     
-    /**
-     * Listar todos los campos (con opción de filtrar por categoría).
-     */
     public function index(Request $request)
     {
         $query = ProjectField::query();
@@ -24,9 +21,6 @@ class ProjectFieldController extends Controller
         return response()->json($query->orderBy('order')->get());
     }
 
-    /**
-     * Crear un nuevo campo.
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -46,9 +40,6 @@ class ProjectFieldController extends Controller
 
 
 
-    /**
-     * Actualizar un campo.
-     */
     public function update(Request $request, ProjectField $projectField)
     {
         $validated = $request->validate([
@@ -66,18 +57,12 @@ class ProjectFieldController extends Controller
         return response()->json($projectField);
     }
 
-    /**
-     * Eliminar un campo.
-     */
     public function destroy(ProjectField $projectField)
     {
         $projectField->delete();
-        return response()->json(['message' => 'Campo eliminado correctamente']);
+        return response()->json(['message' => 'Field deleted successfully']);
     }
 
-    /**
-     * Obtener campos por categoría (atajo).
-     */
 public function byCategory($category)
 {
     $fields = ProjectField::where('category', $category)
@@ -86,13 +71,13 @@ public function byCategory($category)
 
     if ($fields->isEmpty()) {
         return response()->json([
-            'message' => 'No se encontraron campos para esta categoría',
+            'message' => 'No fields found for this category',
             'data' => []
         ], 404);
     }
 
     return response()->json([
-        'message' => 'Campos obtenidos correctamente',
+        'message' => 'Fields retrieved successfully',
         'data' => $fields
     ]);
 }

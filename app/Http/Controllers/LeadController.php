@@ -6,15 +6,32 @@ use App\Models\Lead;
 use App\Models\Client;
 use App\Models\Project;
 use App\Models\Activity;
+use App\Support\PhoneNormalizer;
 use Illuminate\Http\Request;
 
 class LeadController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Lead::with(['client', 'project'])
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $perPage = min($request->integer('per_page', 25), 100);
+        $user    = $request->user();
+
+        $query = Lead::with(['client', 'project'])
+            ->when($request->query('status'),      fn($q, $v) => $q->where('status', $v))
+            ->when($request->query('channel'),     fn($q, $v) => $q->where('channel', $v))
+            ->when($request->query('priority'),    fn($q, $v) => $q->where('priority', $v))
+            ->when($request->query('assigned_to'), fn($q, $v) => $q->where('assigned_to', $v))
+            ->orderBy('created_at', 'desc');
+
+        // Non-admins only see leads assigned to them or unassigned
+        if (!$user->hasRole('admin')) {
+            $query->where(function ($q) use ($user) {
+                $q->where('assigned_to', $user->id)
+                  ->orWhereNull('assigned_to');
+            });
+        }
+
+        return response()->json($query->paginate($perPage));
     }
 
     public function show(Lead $lead)
@@ -40,7 +57,10 @@ class LeadController extends Controller
             'suggested_plan'     => 'nullable|string|max:50',
             'commercial_summary' => 'nullable|string',
             'language'           => 'nullable|string|in:es,en',
+            'assigned_to'        => 'nullable|exists:users,id',
         ]);
+
+        $validated['phone'] = PhoneNormalizer::normalize($validated['phone'] ?? null);
 
         $lead = Lead::create([
             ...$validated,
@@ -74,7 +94,7 @@ class LeadController extends Controller
     public function convert(Request $request, Lead $lead)
     {
         $client = Client::updateOrCreate(
-            ['phone' => $lead->phone],
+            ['phone' => PhoneNormalizer::normalize($lead->phone)],
             [
                 'name'     => $lead->name,
                 'email'    => $lead->email,

@@ -2,51 +2,121 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\User;
-//hash import
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
-    //
-   public function login(Request $request){
+    public function login(Request $request): JsonResponse
+    {
         $request->validate([
-            'email' => 'required|string|email',
+            'email'    => 'required|string|email',
             'password' => 'required|string',
         ]);
-    
+
         $user = User::where('email', $request->email)->first();
-    
+
         if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['error' => 'Credenciales incorrectas.'], 401);
+            return response()->json(['error' => 'Invalid credentials.'], 401);
         }
-    
+
         $token = $user->createToken('auth_token_' . $user->id)->plainTextToken;
-    
+
         return response()->json([
-            'message' => 'Inicio de sesión exitoso',
+            'message'      => 'Login successful',
             'access_token' => $token,
-            'user' => [
-                'id' => $user->id,
-                'name' => $user->name,
-                'email' => $user->email,
-                'phone' => $user->phone, // Teléfono
-                'roles' => $user->getRoleNames(), // Obtener roles del usuario con Spatie
-
-            ],
-            'redirect_url' => '' // URL opcional para el cliente
+            'user'         => $this->formatUser($user),
+            'redirect_url' => '',
         ], 200);
-
     }
 
-      public function logout(Request $request){
+    public function logout(Request $request): JsonResponse
+    {
         if ($request->user()) {
             $request->user()->currentAccessToken()->delete();
-            return response()->json(['message' => 'Sesión cerrada correctamente'], 200);
-        } else {
-            return response()->json(['message' => 'Usuario no autenticado'], 401);
+            return response()->json(['message' => 'Session closed successfully'], 200);
         }
+
+        return response()->json(['message' => 'Unauthenticated'], 401);
+    }
+
+    public function index(): JsonResponse
+    {
+        $users = User::with('roles')->get()->map($this->formatUser(...));
+        return response()->json($users);
+    }
+
+    public function show(User $user): JsonResponse
+    {
+        return response()->json($this->formatUser($user->load('roles')));
+    }
+
+    public function store(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users',
+            'password' => 'required|string|min:8',
+            'role'     => 'nullable|string|exists:roles,name',
+        ]);
+
+        $user = User::create([
+            'name'     => $validated['name'],
+            'email'    => $validated['email'],
+            'password' => $validated['password'],
+        ]);
+
+        if (!empty($validated['role'])) {
+            $user->assignRole($validated['role']);
+        }
+
+        return response()->json($this->formatUser($user), 201);
+    }
+
+    public function update(Request $request, User $user): JsonResponse
+    {
+        $validated = $request->validate([
+            'name'     => 'sometimes|string|max:255',
+            'email'    => 'sometimes|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:8',
+            'role'     => 'nullable|string|exists:roles,name',
+        ]);
+
+        $role = array_key_exists('role', $validated) ? $validated['role'] : false;
+        unset($validated['role']);
+
+        $user->update($validated);
+
+        // false = campo no enviado (no tocar roles); null = envío explícito para limpiar
+        if ($role !== false) {
+            $user->syncRoles($role ? [$role] : []);
+        }
+
+        return response()->json($this->formatUser($user->fresh('roles')));
+    }
+
+    public function destroy(Request $request, User $user): JsonResponse
+    {
+        if ($request->user()->id === $user->id) {
+            return response()->json(['error' => 'You cannot delete your own account.'], 422);
+        }
+
+        $user->tokens()->delete();
+        $user->delete();
+
+        return response()->json(null, 204);
+    }
+
+    private function formatUser(User $user): array
+    {
+        return [
+            'id'              => $user->id,
+            'name'            => $user->name,
+            'email'           => $user->email,
+            'organization_id' => $user->organization_id,
+            'roles'           => $user->getRoleNames(),
+        ];
     }
 }

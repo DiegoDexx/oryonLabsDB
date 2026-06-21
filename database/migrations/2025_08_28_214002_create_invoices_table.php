@@ -14,6 +14,7 @@ return new class extends Migration
 
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id')->default(1);
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->foreignId('subscription_id')->nullable()->constrained()->onDelete('set null');
             $table->string('invoice_number')->unique();
@@ -23,6 +24,8 @@ return new class extends Migration
             $table->date('due_date');
             $table->date('paid_date')->nullable();
             $table->timestamps();
+
+            $table->index('organization_id');
         });
     }
 

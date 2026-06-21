@@ -14,16 +14,19 @@ return new class extends Migration
 
         Schema::create('projects', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('organization_id')->default(1);
             $table->string('name');
             $table->string('category');
             $table->foreignId('client_id')->constrained()->onDelete('cascade');
             $table->enum('stage', [
                 'lead', 'contacted', 'proposal', 'negotiation',
-                'onboarding', 'active', 'closed_won', 'closed_lost'
+                'onboarding', 'active', 'closed_won', 'closed_lost',
             ])->default('lead');
             $table->enum('priority', ['low', 'medium', 'high'])->default('medium');
             $table->date('estimated_delivery')->nullable();
             $table->timestamps();
+
+            $table->index('organization_id');
         });
     }
 

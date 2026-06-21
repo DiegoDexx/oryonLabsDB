@@ -8,9 +8,17 @@ use Illuminate\Http\Request;
 
 class ProjectController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Project::with(['client', 'requirements'])->get());
+        $perPage = min($request->integer('per_page', 25), 100);
+
+        return response()->json(
+            Project::with(['client', 'requirements'])
+                ->when($request->query('client_id'), fn($q, $v) => $q->where('client_id', $v))
+                ->when($request->query('stage'),     fn($q, $v) => $q->where('stage', $v))
+                ->when($request->query('priority'),  fn($q, $v) => $q->where('priority', $v))
+                ->paginate($perPage)
+        );
     }
 
     public function store(Request $request)
@@ -128,7 +136,7 @@ class ProjectController extends Controller
             'client_id' => $project->client_id,
             'project_id' => $project->id,
             'type' => 'system',
-            'description' => "Stage actualizado a: {$request->stage}"
+            'description' => "Stage updated to: {$request->stage}"
         ]);
 
         return response()->json($project);

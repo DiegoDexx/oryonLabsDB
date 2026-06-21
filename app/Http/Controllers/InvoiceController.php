@@ -7,9 +7,19 @@ use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Invoice::with(['client', 'subscription'])->latest()->get());
+        $perPage = min($request->integer('per_page', 25), 100);
+
+        return response()->json(
+            Invoice::with(['client', 'subscription'])
+                ->when($request->query('client_id'),       fn($q, $v) => $q->where('client_id', $v))
+                ->when($request->query('subscription_id'), fn($q, $v) => $q->where('subscription_id', $v))
+                ->when($request->query('status'),          fn($q, $v) => $q->where('status', $v))
+                ->when($request->query('type'),            fn($q, $v) => $q->where('type', $v))
+                ->latest()
+                ->paginate($perPage)
+        );
     }
 
     public function store(Request $request)

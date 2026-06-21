@@ -7,9 +7,18 @@ use Illuminate\Http\Request;
 
 class SubscriptionController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return response()->json(Subscription::with('client')->get());
+        $perPage = min($request->integer('per_page', 25), 100);
+
+        return response()->json(
+            Subscription::with('client')
+                ->when($request->query('client_id'), fn($q, $v) => $q->where('client_id', $v))
+                ->when($request->query('status'),    fn($q, $v) => $q->where('status', $v))
+                ->when($request->query('plan'),      fn($q, $v) => $q->where('plan', $v))
+                ->latest()
+                ->paginate($perPage)
+        );
     }
 
     public function store(Request $request)

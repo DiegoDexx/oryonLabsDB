@@ -47,6 +47,6 @@ class ProjectRequirementController extends Controller
     public function destroy(ProjectRequirement $projectRequirement)
     {
         $projectRequirement->delete();
-        return response()->json(['message' => 'Requisito eliminado correctamente']);
+        return response()->json(['message' => 'Requirement deleted successfully']);
     }
 }
