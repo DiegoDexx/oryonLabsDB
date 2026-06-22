@@ -10,13 +10,11 @@ class ClientController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = min($request->integer('per_page', 25), 100);
-
         return response()->json(
             Client::with(['projects', 'subscriptions'])
                 ->when($request->status,   fn($q, $v) => $q->where('status', $v))
                 ->when($request->language, fn($q, $v) => $q->where('language', $v))
-                ->paginate($perPage)
+                ->get()
         );
     }
 

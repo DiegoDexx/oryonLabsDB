@@ -52,7 +52,8 @@ Route::middleware(['auth:sanctum'])->group(function () {
 
     Route::post('/logout', [UserController::class, 'logout']);
 
-    // Current org features & metrics
+    // Current user profile + org features + dashboard metrics
+    Route::get('/me',          [MeController::class, 'profile']);
     Route::get('/me/features', [MeController::class, 'features']);
     Route::get('/me/metrics',  [MetricsController::class, 'dashboard']);
 

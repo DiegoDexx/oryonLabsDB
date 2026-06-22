@@ -13,8 +13,7 @@ class LeadController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = min($request->integer('per_page', 25), 100);
-        $user    = $request->user();
+        $user = $request->user();
 
         $query = Lead::with(['client', 'project'])
             ->when($request->query('status'),      fn($q, $v) => $q->where('status', $v))
@@ -31,7 +30,7 @@ class LeadController extends Controller
             });
         }
 
-        return response()->json($query->paginate($perPage));
+        return response()->json($query->get());
     }
 
     public function show(Lead $lead)
@@ -134,6 +133,7 @@ class LeadController extends Controller
             'lead'    => $lead,
         ], 201);
     }
+
 
     public function destroy(Lead $lead)
     {

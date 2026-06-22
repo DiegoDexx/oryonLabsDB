@@ -9,15 +9,13 @@ class ActivityController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = min($request->integer('per_page', 25), 100);
-
         return response()->json(
             Activity::with(['client', 'project'])
                 ->when($request->query('client_id'),  fn($q, $v) => $q->where('client_id', $v))
                 ->when($request->query('project_id'), fn($q, $v) => $q->where('project_id', $v))
                 ->when($request->query('type'),       fn($q, $v) => $q->where('type', $v))
                 ->latest()
-                ->paginate($perPage)
+                ->get()
         );
     }
 

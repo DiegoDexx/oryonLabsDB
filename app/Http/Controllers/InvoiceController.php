@@ -9,8 +9,6 @@ class InvoiceController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = min($request->integer('per_page', 25), 100);
-
         return response()->json(
             Invoice::with(['client', 'subscription'])
                 ->when($request->query('client_id'),       fn($q, $v) => $q->where('client_id', $v))
@@ -18,7 +16,7 @@ class InvoiceController extends Controller
                 ->when($request->query('status'),          fn($q, $v) => $q->where('status', $v))
                 ->when($request->query('type'),            fn($q, $v) => $q->where('type', $v))
                 ->latest()
-                ->paginate($perPage)
+                ->get()
         );
     }
 

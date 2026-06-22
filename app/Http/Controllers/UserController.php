@@ -24,11 +24,23 @@ class UserController extends Controller
 
         $token = $user->createToken('auth_token_' . $user->id)->plainTextToken;
 
+        $org        = $user->organization;
+        $planConfig = $org ? config("plans.{$org->plan}", []) : [];
+
         return response()->json([
             'message'      => 'Login successful',
             'access_token' => $token,
             'user'         => $this->formatUser($user),
-            'redirect_url' => '',
+            'organization' => $org ? [
+                'id'             => $org->id,
+                'name'           => $org->name,
+                'plan'           => $org->plan,
+                'business_model' => $org->business_model,
+            ] : null,
+            'features' => $org ? [
+                'modules'  => $planConfig['modules'] ?? [],
+                'channels' => $planConfig['channels'] ?? [],
+            ] : null,
         ], 200);
     }
 
@@ -55,6 +67,22 @@ class UserController extends Controller
 
     public function store(Request $request): JsonResponse
     {
+        $org = $request->user()->organization;
+
+        if ($org) {
+            $maxUsers = config("plans.{$org->plan}.max_users");
+            if ($maxUsers !== null) {
+                $currentCount = User::count();
+                if ($currentCount >= $maxUsers) {
+                    return response()->json([
+                        'error'     => 'user_limit_reached',
+                        'message'   => "Your plan allows a maximum of {$maxUsers} users.",
+                        'max_users' => $maxUsers,
+                    ], 403);
+                }
+            }
+        }
+
         $validated = $request->validate([
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users',

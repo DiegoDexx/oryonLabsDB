@@ -7,6 +7,26 @@ use Illuminate\Http\Request;
 
 class MeController extends Controller
 {
+    public function profile(Request $request): JsonResponse
+    {
+        $user = $request->user()->load('roles');
+        $org  = $user->organization;
+
+        return response()->json([
+            'id'              => $user->id,
+            'name'            => $user->name,
+            'email'           => $user->email,
+            'organization_id' => $user->organization_id,
+            'roles'           => $user->getRoleNames(),
+            'organization'    => $org ? [
+                'id'             => $org->id,
+                'name'           => $org->name,
+                'plan'           => $org->plan,
+                'business_model' => $org->business_model,
+            ] : null,
+        ]);
+    }
+
     public function features(Request $request): JsonResponse
     {
         $org = $request->user()->organization;
