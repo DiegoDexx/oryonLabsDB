@@ -74,6 +74,20 @@ class LeadController extends Controller
         ], 201);
     }
 
+    public function update(Request $request, Lead $lead)
+    {
+        $validated = $request->validate([
+            'assigned_to'  => 'nullable|exists:users,id',
+            'priority'     => 'nullable|in:low,medium,high',
+            'channel'      => 'nullable|string|max:50',
+            'category'     => 'nullable|string|max:100',
+            'project_name' => 'nullable|string|max:255',
+        ]);
+
+        $lead->update(array_filter($validated, fn($v) => $v !== null));
+        return response()->json($lead->fresh());
+    }
+
     public function updateStatus(Request $request, Lead $lead)
     {
         $request->validate([
@@ -90,32 +104,59 @@ class LeadController extends Controller
         return response()->json($lead);
     }
 
-    public function convert(Request $request, Lead $lead)
+    public function convert(Lead $lead)
     {
-        $client = Client::updateOrCreate(
-            ['phone' => PhoneNormalizer::normalize($lead->phone)],
-            [
+        $normalizedPhone = PhoneNormalizer::normalize($lead->phone);
+
+        // Match existing client by phone first, then email — avoids WHERE phone IS NULL collision
+        $client = null;
+        if ($normalizedPhone) {
+            $client = Client::where('phone', $normalizedPhone)->first();
+        }
+        if (!$client && $lead->email) {
+            $client = Client::where('email', $lead->email)->first();
+        }
+
+        if ($client) {
+            $client->update([
+                'name'     => $lead->name,
+                'email'    => $lead->email   ?? $client->email,
+                'company'  => $lead->company ?? $client->company,
+                'status'   => 'active',
+                'language' => $lead->language ?? $client->language,
+            ]);
+        } else {
+            $client = Client::create([
                 'name'     => $lead->name,
                 'email'    => $lead->email,
                 'company'  => $lead->company,
+                'phone'    => $normalizedPhone,
                 'status'   => 'active',
                 'language' => $lead->language ?? 'es',
-            ]
-        );
+            ]);
+        }
 
-        $project = Project::create([
-            'name'               => $lead->project_name ?? "Project: {$lead->name}",
-            'category'           => $lead->category     ?? 'other',
-            'client_id'          => $client->id,
-            'stage'              => 'onboarding',
-            'priority'           => $lead->priority     ?? 'medium',
-            'commercial_summary' => $lead->commercial_summary,
-            'channel'            => $lead->channel,
-        ]);
+        // Don't create a new project if the client already has an active subscription
+        $hasActiveSubscription = $client->subscriptions()
+            ->where('status', 'active')
+            ->exists();
+
+        $project = null;
+        if (!$hasActiveSubscription) {
+            $project = Project::create([
+                'name'               => $lead->project_name ?? "Project: {$lead->name}",
+                'category'           => $lead->category     ?? 'other',
+                'client_id'          => $client->id,
+                'stage'              => 'onboarding',
+                'priority'           => $lead->priority     ?? 'medium',
+                'commercial_summary' => $lead->commercial_summary,
+                'channel'            => $lead->channel,
+            ]);
+        }
 
         Activity::create([
             'client_id'   => $client->id,
-            'project_id'  => $project->id,
+            'project_id'  => $project?->id,
             'type'        => 'system',
             'description' => "Lead converted to client from channel: {$lead->channel}",
         ]);
@@ -123,7 +164,7 @@ class LeadController extends Controller
         $lead->update([
             'status'     => 'converted',
             'client_id'  => $client->id,
-            'project_id' => $project->id,
+            'project_id' => $project?->id,
         ]);
 
         return response()->json([

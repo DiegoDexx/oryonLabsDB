@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    'openrouter' => [
+        'api_key'        => env('OPENROUTER_API_KEY'),
+        'management_key' => env('OPENROUTER_MANAGEMENT_KEY'),
+    ],
+
+    'vapi' => [
+        'api_key' => env('VAPI_API_KEY'),
+    ],
+
+    'n8n' => [
+        'api_key'  => env('N8N_API_KEY'),
+        'base_url' => env('N8N_BASE_URL'),
+    ],
+
 ];

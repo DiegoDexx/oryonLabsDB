@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ActivityController;
 use App\Http\Controllers\ClientController;
+use App\Http\Controllers\GlobalSearchController;
 use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LeadController;
 use App\Http\Controllers\LeadLookupController;
@@ -11,6 +12,7 @@ use App\Http\Controllers\MetricsController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\ProjectFieldController;
 use App\Http\Controllers\ProjectRequirementController;
+use App\Http\Controllers\RateLimitController;
 use App\Http\Controllers\SubscriptionController;
 use App\Http\Controllers\UserController;
 
@@ -21,6 +23,10 @@ use App\Http\Controllers\UserController;
 */
 
 Route::post('/login', [UserController::class, 'login']);
+
+// Rate limit check — called by chatbot without auth
+Route::get('rate-limit/check', [RateLimitController::class, 'checkRateLimit'])
+    ->middleware('throttle:120,1');
 
 // Lead form — submitted by chatbot / public form
 Route::post('leads', [LeadController::class, 'store']);
@@ -57,6 +63,12 @@ Route::middleware(['auth:sanctum'])->group(function () {
     Route::get('/me/features', [MeController::class, 'features']);
     Route::get('/me/metrics',  [MetricsController::class, 'dashboard']);
 
+    // Integration metrics — OryonX admin: usage, calls, executions, margin per org
+    Route::get('metrics/usage',      [MetricsController::class, 'usage']);
+    Route::get('metrics/calls',      [MetricsController::class, 'calls']);
+    Route::get('metrics/executions', [MetricsController::class, 'executions']);
+    Route::get('metrics/margin',     [MetricsController::class, 'margin']);
+
     // User management
     Route::get('users',           [UserController::class, 'index']);
     Route::post('users',          [UserController::class, 'store']);
@@ -75,6 +87,7 @@ Route::middleware(['auth:sanctum'])->group(function () {
     // Leads — CRM management
     Route::get('leads',                  [LeadController::class, 'index']);
     Route::get('leads/{lead}',           [LeadController::class, 'show']);
+    Route::patch('leads/{lead}',         [LeadController::class, 'update']);
     Route::patch('leads/{lead}/status',  [LeadController::class, 'updateStatus']);
     Route::patch('leads/{lead}/notes',   [LeadController::class, 'updateNotes']);
     Route::post('leads/{lead}/convert',  [LeadController::class, 'convert']);
@@ -106,5 +119,9 @@ Route::middleware(['auth:sanctum'])->group(function () {
         Route::apiResource('invoices', InvoiceController::class);
         Route::patch('invoices/{invoice}/mark-paid', [InvoiceController::class, 'markAsPaid']);
     });
+
+    // Global search across Client, Lead, Invoice, Subscription (within authenticated org scope)
+    Route::get('search', [GlobalSearchController::class, 'search'])
+        ->middleware('throttle:60,1');
 
 });

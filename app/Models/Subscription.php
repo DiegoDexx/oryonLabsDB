@@ -2,7 +2,9 @@
 
 namespace App\Models;
 
+use App\Support\PhoneNormalizer;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
@@ -51,5 +53,25 @@ class Subscription extends Model
     public function invoices()
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    // Search via client relation — Subscription has no direct email/phone/name columns
+
+    public static function searchByEmail(string $email): Collection
+    {
+        return static::whereHas('client', fn ($q) => $q->where('email', trim($email)))->get();
+    }
+
+    public static function searchByPhone(string $phone): Collection
+    {
+        $normalized = PhoneNormalizer::normalize($phone);
+        if (!$normalized) return collect();
+
+        return static::whereHas('client', fn ($q) => $q->where('phone', $normalized))->get();
+    }
+
+    public static function searchByName(string $name): Collection
+    {
+        return static::whereHas('client', fn ($q) => $q->where('name', 'ILIKE', '%' . trim($name) . '%'))->get();
     }
 }

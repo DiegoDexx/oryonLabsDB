@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Client extends Model
+class VoiceCallLog extends Model
 {
-    use SoftDeletes, Searchable;
-
     protected $fillable = [
         'organization_id',
-        'name',
-        'company',
-        'email',
-        'phone',
-        'status',
-        'language',
+        'lead_id',
+        'vapi_call_id',
+        'duration_seconds',
+        'cost_usd',
+        'ended_reason',
+        'summary',
+        'recording_url',
+    ];
+
+    protected $casts = [
+        'cost_usd' => 'decimal:4',
     ];
 
     protected static function booted(): void
@@ -33,28 +34,8 @@ class Client extends Model
             if (empty($model->organization_id)) {
                 $model->organization_id = auth()->check()
                     ? auth()->user()->organization_id
-                    : 1;
+                    : null;
             }
         });
-    }
-
-    public function projects()
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function activities()
-    {
-        return $this->hasMany(Activity::class);
-    }
-
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
     }
 }

@@ -2,23 +2,24 @@
 
 namespace App\Models;
 
-use App\Traits\Searchable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Client extends Model
+class LlmUsageLog extends Model
 {
-    use SoftDeletes, Searchable;
-
     protected $fillable = [
         'organization_id',
-        'name',
-        'company',
-        'email',
-        'phone',
-        'status',
-        'language',
+        'lead_id',
+        'generation_id',
+        'model',
+        'prompt_tokens',
+        'completion_tokens',
+        'cost_usd',
+        'channel',
+    ];
+
+    protected $casts = [
+        'cost_usd' => 'decimal:6',
     ];
 
     protected static function booted(): void
@@ -33,28 +34,8 @@ class Client extends Model
             if (empty($model->organization_id)) {
                 $model->organization_id = auth()->check()
                     ? auth()->user()->organization_id
-                    : 1;
+                    : null;
             }
         });
-    }
-
-    public function projects()
-    {
-        return $this->hasMany(Project::class);
-    }
-
-    public function subscriptions()
-    {
-        return $this->hasMany(Subscription::class);
-    }
-
-    public function activities()
-    {
-        return $this->hasMany(Activity::class);
-    }
-
-    public function invoices()
-    {
-        return $this->hasMany(Invoice::class);
     }
 }
