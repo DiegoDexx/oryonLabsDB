@@ -1,7 +1,8 @@
 {
   "permissions": {
     "allow": [
-      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\diego\\\\Desktop\\\\Proyectos\\\\oryonLabsFront-v2\\\\src\\\\components\\\\adminPanel\\\\modals\\\\\" -File | ForEach-Object { $_.Name })"
+      "PowerShell(Get-ChildItem -Path \"C:\\\\Users\\\\diego\\\\Desktop\\\\Proyectos\\\\oryonLabsFront-v2\\\\src\\\\components\\\\adminPanel\\\\modals\\\\\" -File | ForEach-Object { $_.Name })",
+      "Bash(php artisan *)"
     ]
   }
 }

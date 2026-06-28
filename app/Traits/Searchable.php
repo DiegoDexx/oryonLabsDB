@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use App\Support\PhoneNormalizer;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 trait Searchable
 {
@@ -22,6 +23,7 @@ trait Searchable
 
     public static function searchByName(string $name): Collection
     {
-        return static::where('name', 'ILIKE', '%' . trim($name) . '%')->get();
+        $op = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+        return static::where('name', $op, '%' . trim($name) . '%')->get();
     }
 }

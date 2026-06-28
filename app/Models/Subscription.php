@@ -6,6 +6,7 @@ use App\Support\PhoneNormalizer;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
 
 class Subscription extends Model
 {
@@ -59,7 +60,7 @@ class Subscription extends Model
 
     public static function searchByEmail(string $email): Collection
     {
-        return static::whereHas('client', fn ($q) => $q->where('email', trim($email)))->get();
+        return static::with('client')->whereHas('client', fn ($q) => $q->where('email', trim($email)))->get();
     }
 
     public static function searchByPhone(string $phone): Collection
@@ -67,11 +68,12 @@ class Subscription extends Model
         $normalized = PhoneNormalizer::normalize($phone);
         if (!$normalized) return collect();
 
-        return static::whereHas('client', fn ($q) => $q->where('phone', $normalized))->get();
+        return static::with('client')->whereHas('client', fn ($q) => $q->where('phone', $normalized))->get();
     }
 
     public static function searchByName(string $name): Collection
     {
-        return static::whereHas('client', fn ($q) => $q->where('name', 'ILIKE', '%' . trim($name) . '%'))->get();
+        $op = DB::connection()->getDriverName() === 'pgsql' ? 'ilike' : 'like';
+        return static::with('client')->whereHas('client', fn ($q) => $q->where('name', $op, '%' . trim($name) . '%'))->get();
     }
 }
